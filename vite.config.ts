@@ -1,14 +1,13 @@
 import { defineConfig, loadEnv, ConfigEnv, UserConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
 import path from 'path';
-import { createHtmlPlugin } from "vite-plugin-html";
+import vitePlugins from './config/plugins'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
 
   // loadEnv(): 是vite用来加载环境变量的方法
   // process.cwd(): 用于获取node.js流程的当前工作目录
-  const env = loadEnv(mode, process.cwd() + '/env');
+  const env = loadEnv(mode, process.cwd() + '/config/env');
   console.log('当前环境：',mode);
   console.log('当前环境参数：', env);
   return {
@@ -22,6 +21,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         '~': path.resolve(__dirname, 'assets')
       }
     },
+    plugins: vitePlugins(env.VITE_APP_TITLE),
     server: {
       host: '0.0.0.0', // 监听所有·地址
       port: Number(env.VITE_PRO_PORT), // 端口
@@ -34,18 +34,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
           rewrite: (path) => path.replace(/^\/api/, ''),
         }
       }
-
     },
-    plugins: [
-      vue(),
-      createHtmlPlugin({  // 根据env 渲染title
-        inject: {         // 安装 npm i vite-plugin-html -D
-          data: {         // index.html 文件里修改title标签为 <title><%- title %></title>
-              title: env.VITE_APP_TITLE
-          },
-      },
-      })
-    ],
     build: {
       outDir: 'build', //  设置打包输出目录
       assetsDir: 'public', // 指定生成静态资源的存放路径（相对于 build.outDir）
